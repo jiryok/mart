@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>mart_client</title>
+<style>
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f4f6f9;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Title */
+h3 {
+    margin-top: 20px;
+    font-size: 22px;
+}
+
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+th {
+    background: #2c3e50;
+    color: white;
+    padding: 12px;
+    font-size: 14px;
+}
+
+td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+/* Row hover */
+tr:hover {
+    background: #f1f7ff;
+}
+
+/* Input */
+input[type="number"] {
+    width: 70px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+/* 
+input[type="button"] {
+    
+} */
+
+/* Total column */
+td[id^="t"] {
+    font-weight: bold;
+    color: #27ae60;
+}
+
+/* Grand total */
+#grandTotal {
+    color: #e74c3c;
+    font-weight: bold;
+    font-size: 24px;
+}
+
+/* Buttons */
+button {
+    margin-top: 15px;
+    margin-right: 10px;
+    padding: 10px 18px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+/* Different button styles */
+button:nth-of-type(1) {
+    background: #27ae60;
+    color: white;
+}
+
+button:nth-of-type(2) {
+    background: #e74c3c;
+    color: white;
+}
+
+button:nth-of-type(3) {
+    background: #3498db;
+    color: white;
+}
+
+/* Hover effect */
+button:hover {
+    opacity: 0.85;
+    transform: scale(1.03);
+}
+</style>
+</head>
+
+<body>
+
+<table border="1" id="productTable">
+    <tr>
+        <th>ID</th>
+        <th>NAME</th>
+        <th>PRICE</th>
+        <!-- <th>+</th> -->
+        <th>QUANTITY</th>
+       <!--  <th>-</th> -->
+        <th>TOTAL</th>
+    </tr>
+</table>
+
+<h3>Grand Total: <span id="grandTotal">0</span> บาท</h3>
+<button onclick="checkout()">Checkout</button>
+<button onclick="resetCart()">Reset</button>
+<button onclick="exportCSV()">export</button>
+
+<script>
+    const products = [
+        { id : "1101" , name : "โลตัส น่องไก่ (15กรัม)" , price : 10 },
+        { id : "1102" , name : "ป๊อกกี้ (10กรัม)" , price : 10 },
+        { id : "1103" , name : "โอรีโอ้ (24.6กรัม)" , price : 5 },
+        { id : "1104" , name : "เถ้าแก่น้อย สาหร่ายทอดกรอบรสดั้งเดิม(3.2กรัม)" , price : 15 },
+        { id : "1105" , name : "มาชิตะ สาหร่ายอบกรอบ รสเผ็ด(4กรัม)" , price : 15 },
+        { id : "1106" , name : "หมึกกรุบ (น้ำจิ้มงา)" , price : 10 },
+        { id : "1107" , name : "EURO Cake Custard (17 กรัม)" , price : 7 },
+        { id : "1108" , name : "EURO CHOCOPIE Chocolate Center (18 g)" , price : 14 },
+        { id : "1109" , name : "MAMA Cup รสหมูสับ(60 กรัม)" , price : 18 },
+        { id : "1110" , name : "เลย์ ร็อค มันฝรั่งแท้ทอดกรอบ รสเอ็กซ์ตร้าบาร์บีคิว (13กรัม)" , price : 6 },
+        { id : "1111" , name : "เลย์ ร็อค มันฝรั่งแท้ทอดกรอบ รสมันฝรั่งแท้ (13กรัม)" , price : 6 },
+        { id : "1112" , name : "เบนโตะ หมึกกรอบทรงเครื่อง 4 ก." , price : 10 },
+        { id : "1113" , name : "ปาร์ตี้ ขนมกรอบ รสคาราเมล (สีแดง)" , price : 10 },
+        { id : "1114" , name : "ปาร์ตี้ ขนม ครองแครง (สีม่วง)" , price : 10 },
+        { id : "1115" , name : "ไก่ย่าง ขนมทอดกรอบ 12 ก." , price : 10 },
+        { id : "1116" , name : "โตโร ข้าวโพด รสเนย 20 ก." , price : 10 },
+        { id : "1117" , name : "ยูปี้ กัมมี่ เยลลี่ซาวร์ กัมมี่ แฟนซี คละแบบ 14 ก." , price : 10 },
+        { id : "1118" , name : "ฮาริโบ้ กัมมี่ โกล์ดแบร์ส 14 ก." , price : 10 },
+        { id : "1201" , name : "โค้กกระป๋อง" , price : 1 },
+        { id : "1202" , name : "สไปร์ท" , price : 1 },
+        { id : "1203" , name : "โออิชิ องุ่นเคียวโฮ" , price : 1 },
+        { id : "1204" , name : "โออิชิ น้ำผึ้งมะนาว" , price : 1 },
+        { id : "1205" , name : "สิงห์ เลม่อนโซดา" , price : 1 },
+        { id : "1206" , name : "อิชิตันกรีนที น้ำผึ้งมะนาว" , price : 1 },
+        { id : "1207" , name : "โค้กซีโร่กระป๋อง" , price : 1 },
+        { id : "1208" , name : "โออิชิ ชาคูลล์ซ่า รสน้ำผึ้งผสมมะนาว " , price : 1 },
+        { id : "1209" , name : "เซเว่นอัพ ไม่มีน้ำตาล" , price : 1 },
+        { id : "1210" , name : "แฟนต้ากลิ่นส้ม" , price : 1 },
+        { id : "1211" , name : "คาสพิส แลกโตะ โซดา" , price : 1 },
+        { id : "9999" , name : "test", price : 0},
+    ];
+</script>
+<script>
+const table = document.getElementById("productTable");
+
+products.forEach(p => {
+    let row = `
+        <tr>
+            <td>${p.id}</td>
+            <td>${p.name}</td>
+            <td id="p${p.id}">${p.price}</td>   
+            <td><input type="number" id="${p.id}" min="0"></td>
+            <td id="t${p.id}">0</td>
+        </tr>
+    `;
+    table.innerHTML += row;
+});
+
+
+function calculate() {
+    let total = 0;
+
+    products.forEach(p => {
+        let qty = parseFloat(document.getElementById(p.id).value) || 0;
+        let sum = qty * p.price;
+
+        document.getElementById("t" + p.id).innerText = sum;
+        total += sum;
+    });
+
+    document.getElementById("grandTotal").innerText = total;
+}
+
+document.addEventListener("input", calculate);
+
+function checkout() {
+    let items = [];
+
+    products.forEach(p => {
+        let qty = parseFloat(document.getElementById(p.id).value) || 0;
+
+        if (qty > 0) {
+            items.push({
+                id: p.id,
+                name: p.name,
+                price: p.price,
+                qty: qty
+            });
+        }
+    });
+
+    let record = {
+        time: new Date().toLocaleString(),
+        shop_id: "SHOP01",
+        items: items
+    };
+
+    let history = JSON.parse(localStorage.getItem("salesCSV")) || [];
+
+    let time = new Date().toLocaleString();
+
+    products.forEach(p => {
+        let qty = parseFloat(document.getElementById(p.id).value) || 0;
+
+        if (qty > 0) {
+            history.push([
+                time,
+                p.id,
+                p.name,
+                p.price,
+                qty,
+                p.price * qty
+            ]);
+        }
+    });
+
+    localStorage.setItem("salesCSV", JSON.stringify(history));
+
+    fetch("https://script.google.com/macros/s/AKfycbxCwrJ3bx0PZlAECdAZfi1Rw_fyv6hyAH8I-5YNsCsc_5cbfwdHo9mooZIvud_lE40/exec", {
+    method: "POST",
+    mode: "no-cors",   // 🔥 important
+    body: JSON.stringify(record)
+    });
+
+    alert("✅ Sent to Google Sheets")
+    resetCart()
+
+    .then(data => {
+        alert("✅ Sent to Google Sheets");
+    })
+    .catch(err => {
+        alert("❌ Failed");
+        console.error(err);
+    });
+
+    resetCart();
+}
+function exportCSV() {
+    let history = JSON.parse(localStorage.getItem("salesCSV")) || [];
+
+    let header = [["Time","ID","Name","Price","Qty","Total"]];
+    let rows = header.concat(history);
+
+    let csv = rows.map(r => r.join(",")).join("\n");
+
+    let blob = new Blob([csv], { type: "text/csv" });
+    let a = document.createElement("a");
+
+    a.href = URL.createObjectURL(blob);
+    a.download = "sales_history.csv";
+    a.click();
+}
+
+function resetCart() {
+    products.forEach(p => {
+        document.getElementById(p.id).value = "";
+        document.getElementById("t" + p.id).innerText = 0;
+    });
+
+    document.getElementById("grandTotal").innerText = 0;
+}
+</script>
+
+</body>
+</html>
